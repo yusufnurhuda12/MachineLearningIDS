@@ -104,8 +104,8 @@ def find_file(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     candidates = [
         filename,                                        # CWD
-        os.path.join(script_dir, filename),              # sama dengan script
-        os.path.join(script_dir, '..', filename),        # parent (HF: /code)
+        os.path.join(script_dir, filename),              # Sama dengan script (jika semua di root)
+        os.path.join(script_dir, '..', filename),        # Keluar folder src ke ROOT (PENTING UNTUK LOKAL)
         os.path.join('/code', filename),                 # HF Spaces root
     ]
     for p in candidates:
