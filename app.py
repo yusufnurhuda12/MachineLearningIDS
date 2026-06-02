@@ -542,7 +542,7 @@ elif menu == "👨‍💻 About Us":
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Custom CSS tambahan khusus buat efek kartu profil modern & tombol klik
+    # Custom CSS tambahan khusus buat efek kartu profil modern & foto bulat
     st.markdown("""
     <style>
         .profile-card {
@@ -566,16 +566,20 @@ elif menu == "👨‍💻 About Us":
             border-color: #3B82F6;
         }
         .avatar {
-            font-size: 60px;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
             margin-bottom: 15px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            border: 3px solid #3B82F6;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .profile-name {
             font-size: 20px;
             font-weight: 700;
             color: #FFFFFF;
             margin-bottom: 6px;
-            min-height: 56px; /* Menjaga tinggi nama tetap sejajar */
+            min-height: 56px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -615,7 +619,7 @@ elif menu == "👨‍💻 About Us":
         st.markdown("""
         <div class="profile-card">
             <div>
-                <div class="avatar">👩‍💻</div>
+                <img src="https://media.licdn.com/dms/image/v2/D5603AQEnjCz_u2HdRw/profile-displayphoto-scale_400_400/B56Z4nyPj4J4Ag-/0/1778783944144?e=1781740800&v=beta&t=e5G-2Y7Y9id844xLXUFeZZC2phRh6tt2htEOvjUoGts" class="avatar" alt="Meisyaroh">
                 <div class="profile-name">Meisyaroh Azzahra</div>
                 <div class="profile-id">NIM. 101112480109</div>
             </div>
@@ -629,7 +633,7 @@ elif menu == "👨‍💻 About Us":
         st.markdown("""
         <div class="profile-card">
             <div>
-                <div class="avatar">👨‍💻</div>
+                <img src="https://media.licdn.com/dms/image/v2/D4E35AQFkxKOEk5NXrg/profile-framedphoto-shrink_400_400/profile-framedphoto-shrink_400_400/0/1635408147345?e=1780981200&v=beta&t=DX94nbAHdj13JhX_ptVylpo2VIeP1nXZmDioWnC3F5I" class="avatar" alt="Mu'alim">
                 <div class="profile-name">Mu’alim Rohmadi</div>
                 <div class="profile-id">NIM. 101112480098</div>
             </div>
@@ -643,7 +647,7 @@ elif menu == "👨‍💻 About Us":
         st.markdown("""
         <div class="profile-card">
             <div>
-                <div class="avatar">🧑‍💻</div>
+                <img src="https://media.licdn.com/dms/image/v2/D5635AQE2hOCRkFeaFQ/profile-framedphoto-shrink_400_400/B56Z5ELttrKgAc-/0/1779260382343?e=1780981200&v=beta&t=F69eX9_j8MOLt7geKJEZdYR415FezZqjXMAY9H9e5PI" class="avatar" alt="Yusuf">
                 <div class="profile-name">Muhammad Yusuf Nurhuda</div>
                 <div class="profile-id">NIM. 101112480096</div>
             </div>
