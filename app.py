@@ -622,6 +622,7 @@ elif menu == "👨‍💻 About Us":
                 <img src="https://raw.githubusercontent.com/yusufnurhuda12/MachineLearningIDS/main/profile/meisaroh.jpg" class="avatar" alt="Meisyaroh">
                 <div class="profile-name">Meisyaroh Azzahra</div>
                 <div class="profile-id">NIM. 101112480109</div>
+                <div class="profile-id">Cyber Security Engineer | ICT Security Operations | Network Defense & Endpoint Compliance at Lintasarta</div>
             </div>
             <a class="linkedin-btn" href="https://www.linkedin.com/in/meisyaroh-azzahra-0100b5206/" target="_blank">
                 🔗 Connect LinkedIn
@@ -636,6 +637,7 @@ elif menu == "👨‍💻 About Us":
                 <img src="https://raw.githubusercontent.com/yusufnurhuda12/MachineLearningIDS/main/profile/mualim.jpg" class="avatar" alt="Mu'alim">
                 <div class="profile-name">Mu’alim Rohmadi</div>
                 <div class="profile-id">NIM. 101112480098</div>
+                <div class="profile-id">Project Engineer FTTH | Survey&Design | Cyber Security Entusiasm at MyRepublic</div>
             </div>
             <a class="linkedin-btn" href="https://www.linkedin.com/in/mualimr/" target="_blank">
                 🔗 Connect LinkedIn
@@ -650,6 +652,7 @@ elif menu == "👨‍💻 About Us":
                 <img src="https://raw.githubusercontent.com/yusufnurhuda12/MachineLearningIDS/main/profile/yusuf.jpg" class="avatar" alt="Yusuf">
                 <div class="profile-name">Muhammad Yusuf Nurhuda</div>
                 <div class="profile-id">NIM. 101112480096</div>
+                <div class="profile-id">Telecommunications & Digital Infrastructure Engineer | FTTH | 5G FWA | Awarded “Best SND Staff 2024” and “Top 10th SND Staff 2025” at MyRepublic (Sinarmas Group)</div>
             </div>
             <a class="linkedin-btn" href="https://www.linkedin.com/in/yusufnurhuda/" target="_blank">
                 🔗 Connect LinkedIn
