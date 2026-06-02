@@ -205,9 +205,9 @@ def load_all_models():
         }
     
     # ── RF V1 (Before tuning) ──
-    if fexists('random_forest_model.pkl', 'scaler.pkl'):
-        model_rf1 = joblib.load(find_file('random_forest_model.pkl'))
-        scaler_rf1 = joblib.load(find_file('scaler.pkl'))
+    if fexists('random_forest_model_v1.pkl', 'scaler_v1.pkl'):
+        model_rf1 = joblib.load(find_file('random_forest_model_v1.pkl'))
+        scaler_rf1 = joblib.load(find_file('scaler_v1.pkl'))
         models['rf_v1'] = {
             'model': model_rf1, 'scaler': scaler_rf1, 'features': None,
             'label_enc': None, 'thresh': None, 'name': 'Random Forest V1'
