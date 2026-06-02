@@ -537,33 +537,119 @@ elif menu == "📊 Informasi Model":
 # MENU 3 – ABOUT US
 # ═══════════════════════════════════════════════
 elif menu == "👨‍💻 About Us":
+  elif menu == "👨‍💻 About Us":
     st.header("👨‍💻 Identitas Tim")
-    st.markdown("Kenali tim pengembang di balik pembuatan aplikasi NIDS Dashboard ini.")
+    st.markdown("Kenali tim pengembang hebat di balik pembuatan aplikasi NIDS Dashboard ini.")
     
     st.markdown("<br>", unsafe_allow_html=True)
     
+    # Custom CSS tambahan khusus buat efek kartu profil modern & tombol klik
+    st.markdown("""
+    <style>
+        .profile-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .profile-card:hover {
+            transform: translateY(-5px);
+            border-color: #3B82F6;
+        }
+        .avatar {
+            font-size: 60px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 6px;
+            min-height: 56px; /* Menjaga tinggi nama tetap sejajar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-id {
+            font-size: 14px;
+            color: #9CA3AF;
+            letter-spacing: 0.05em;
+            margin-bottom: 25px;
+        }
+        .linkedin-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #0077B5;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            width: 85%;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+        }
+        .linkedin-btn:hover {
+            background: #005987;
+            transform: scale(1.02);
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Bikin 3 Kolom Responsif
     c1, c2, c3 = st.columns(3)
     
     with c1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div style="font-size: 50px;">👨‍💻</div>
-            <div class="metric-value blue" style="font-size: 20px; margin-top: 10px;">Muhammad Faiq Sahal Fatah</div>
-            <div class="metric-label">21101045</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="profile-card">
+            <div>
+                <div class="avatar">👩‍💻</div>
+                <div class="profile-name">Meisyaroh Azzahra</div>
+                <div class="profile-id">NIM. 101112480109</div>
+            </div>
+            <a class="linkedin-btn" href="https://www.linkedin.com/in/meisyaroh-azzahra-0100b5206/" target="_blank">
+                🔗 Connect LinkedIn
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
         
     with c2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div style="font-size: 50px;">🧑‍💻</div>
-            <div class="metric-value blue" style="font-size: 20px; margin-top: 10px;">Muh Sidik Setiawan</div>
-            <div class="metric-label">21101050</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="profile-card">
+            <div>
+                <div class="avatar">👨‍💻</div>
+                <div class="profile-name">Mu’alim Rohmadi</div>
+                <div class="profile-id">NIM. 101112480098</div>
+            </div>
+            <a class="linkedin-btn" href="https://www.linkedin.com/in/mualimr/" target="_blank">
+                🔗 Connect LinkedIn
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
         
     with c3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div style="font-size: 50px;">👨‍💻</div>
-            <div class="metric-value blue" style="font-size: 20px; margin-top: 10px;">Muhammad Abadias Safik</div>
-            <div class="metric-label">21101053</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="profile-card">
+            <div>
+                <div class="avatar">🧑‍💻</div>
+                <div class="profile-name">Muhammad Yusuf Nurhuda</div>
+                <div class="profile-id">NIM. 101112480096</div>
+            </div>
+            <a class="linkedin-btn" href="https://www.linkedin.com/in/yusufnurhuda/" target="_blank">
+                🔗 Connect LinkedIn
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
