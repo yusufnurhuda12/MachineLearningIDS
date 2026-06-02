@@ -537,7 +537,6 @@ elif menu == "📊 Informasi Model":
 # MENU 3 – ABOUT US
 # ═══════════════════════════════════════════════
 elif menu == "👨‍💻 About Us":
-  elif menu == "👨‍💻 About Us":
     st.header("👨‍💻 Identitas Tim")
     st.markdown("Kenali tim pengembang hebat di balik pembuatan aplikasi NIDS Dashboard ini.")
     
