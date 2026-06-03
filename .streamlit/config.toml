@@ -1,14 +1,2 @@
 [server]
 maxUploadSize = 512
-
-
-# Sembunyikan database user lokal
-users.json
-
-# Sembunyikan file konfigurasi rahasia Streamlit
-.streamlit/secrets.toml
-.env
-
-# Sembunyikan folder cache bawaan Python
-__pycache__/
-*.pyc
