@@ -1,0 +1,17 @@
+# Rahasia & Konfigurasi Lokal
+config.json
+users.json
+
+# Cache Streamlit
+.streamlit/
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Upload Direktori
+user_avatars/*
+!user_avatars/.gitkeep
