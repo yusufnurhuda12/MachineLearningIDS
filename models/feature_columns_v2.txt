@@ -1,0 +1,22 @@
+Flow Duration
+Bwd Packet Length Max
+Fwd Packet Length Max
+Flow IAT Mean
+Bwd Packets/s
+Fwd IAT Mean
+Total Length of Fwd Packets
+Flow Packets/s
+Fwd Packet Length Mean
+Init_Win_bytes_forward
+Init_Win_bytes_backward
+Flow IAT Std
+Total Fwd Packets
+PSH Flag Count
+Pkt_Rate
+Bwd Packet Length Min
+Fwd Packet Length Min
+Pkt_Ratio
+ACK Flag Count
+Fwd IAT Min
+Min Packet Length
+Flow Bytes/s
