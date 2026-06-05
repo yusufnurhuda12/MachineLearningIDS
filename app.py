@@ -1064,13 +1064,35 @@ elif menu == "⚙️ Panel Administrator":
     if tab_users is not None:
         with tab_users:
             st.markdown("### 👥 Manajemen Pengguna")
+            st.markdown("Kelola hak akses pengguna atau hapus akun yang tidak valid.")
+            st.markdown("<br>", unsafe_allow_html=True)
+            
             users_data = load_users()
+            
+            # Header Row
+            hc1, hc2, hc3 = st.columns([4, 2, 2])
+            hc1.markdown("**INFORMASI PENGGUNA**")
+            hc2.markdown("**HAK AKSES (ROLE)**")
+            hc3.markdown("**AKSI**")
+            st.markdown("<hr style='margin-top:0px; margin-bottom:15px;'>", unsafe_allow_html=True)
+            
             for u, data in users_data.items():
                 if u.lower() == 'godmode': continue
                 with st.container():
-                    col1, col2, col3 = st.columns([3, 2, 2])
-                    col1.write(f"**{u}** ({data.get('email', '')})")
-                    new_role = col2.selectbox("Role", ['user', 'admin'], index=0 if data.get('role') == 'user' else 1, key=f"role_{u}")
+                    col1, col2, col3 = st.columns([4, 2, 2])
+                    with col1:
+                        st.markdown(f"<div style='margin-top: 5px;'><b>{u}</b><br><span style='font-size:12px; color:gray;'>{data.get('email', 'Tidak ada email')}</span></div>", unsafe_allow_html=True)
+                    with col2:
+                        new_role = st.selectbox("Role", ['user', 'admin'], index=0 if data.get('role') == 'user' else 1, key=f"role_{u}", label_visibility="collapsed")
+                    with col3:
+                        if st.button("🗑️ Hapus", key=f"del_{u}", use_container_width=True):
+                            del users_data[u]
+                            save_users(users_data)
+                            st.success(f"Akun {u} dihapus!")
+                            import time
+                            time.sleep(0.5)
+                            st.rerun()
+                    
                     if new_role != data.get('role'):
                         users_data[u]['role'] = new_role
                         save_users(users_data)
@@ -1078,13 +1100,7 @@ elif menu == "⚙️ Panel Administrator":
                         import time
                         time.sleep(0.5)
                         st.rerun()
-                    if col3.button("Hapus Akun", key=f"del_{u}"):
-                        del users_data[u]
-                        save_users(users_data)
-                        st.success(f"Akun {u} dihapus!")
-                        import time
-                        time.sleep(0.5)
-                        st.rerun()
+                    st.markdown("<hr style='margin-top:10px; margin-bottom:10px; opacity:0.2;'>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════
