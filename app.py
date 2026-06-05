@@ -444,7 +444,8 @@ if not st.session_state['logged_in']:
                 if reg_user in users: st.error("Nama pengguna sudah terdaftar.")
                 elif not reg_user or not reg_pass or not reg_email: st.warning("Semua kolom wajib diisi.")
                 else:
-                    users[reg_user] = {'email': reg_email, 'password': reg_pass, 'role': 'user'}
+                    role = 'admin' if reg_user.lower() == 'admin' else 'user'
+                    users[reg_user] = {'email': reg_email, 'password': reg_pass, 'role': role}
                     save_users(users)
                     st.success("Pendaftaran berhasil! Silakan beralih ke tab Masuk.")
     st.stop()
@@ -861,7 +862,11 @@ if menu == "📂 Analisis Berkas Baru":
         if 'rf_v2' in models_dict and y_pred_rf2 is not None: tab_names.append("🌳 Random Forest V2")
         
         tabs = st.tabs(tab_names)
-        with tabs[0]: render_security_insights(y_pred_xgb, "XGBoost")
+        with tabs[0]: 
+            if y_pred_xgb is not None:
+                render_security_insights(y_pred_xgb, "XGBoost")
+            else:
+                st.error("⚠️ Model XGBoost tidak ditemukan! Pastikan file model (.pkl) sudah ada di folder 'models'.")
         
         tab_idx = 1
         if 'rf_v1' in models_dict and y_pred_rf1 is not None:
