@@ -324,33 +324,47 @@ def generate_model_eval_insight_with_gemini(acc, prec, rec, f1, title, api_key, 
 # ─────────────────────────────────────────────
 # AUTHENTICATION & CONFIG HELPERS
 # ─────────────────────────────────────────────
+import requests
+
 USERS_FILE = 'users.json'
 CONFIG_FILE = 'config.json'
-
-def load_users():
-    if not os.path.exists(USERS_FILE): return {}
-    with open(USERS_FILE, 'r') as f: return json.load(f)
-
-def save_users(users_data):
-    with open(USERS_FILE, 'w') as f: json.dump(users_data, f)
-
-def load_config():
-    if not os.path.exists(CONFIG_FILE): return {}
-    with open(CONFIG_FILE, 'r') as f: return json.load(f)
-
-def save_config(config_data):
-    with open(CONFIG_FILE, 'w') as f: json.dump(config_data, f)
-
 HISTORY_FILE = 'analysis_history.json'
 
-def load_history():
-    if not os.path.exists(HISTORY_FILE): return []
-    with open(HISTORY_FILE, 'r') as f:
-        try: return json.load(f)
-        except: return []
+def get_firebase_url(path):
+    try:
+        base_url = st.secrets["FIREBASE_URL"].strip("/")
+        return f"{base_url}/{path}.json"
+    except:
+        return None
 
-def save_history(history_data):
-    with open(HISTORY_FILE, 'w') as f: json.dump(history_data, f)
+def load_from_firebase(path, default_val):
+    url = get_firebase_url(path)
+    if url:
+        try:
+            r = requests.get(url, timeout=5)
+            if r.status_code == 200 and r.json() is not None:
+                return r.json()
+        except: pass
+    local_file = f"{path}.json" if path != "history" else HISTORY_FILE
+    if not os.path.exists(local_file): return default_val
+    with open(local_file, 'r') as f:
+        try: return json.load(f)
+        except: return default_val
+
+def save_to_firebase(path, data):
+    url = get_firebase_url(path)
+    if url:
+        try: requests.put(url, json=data, timeout=5)
+        except: pass
+    local_file = f"{path}.json" if path != "history" else HISTORY_FILE
+    with open(local_file, 'w') as f: json.dump(data, f)
+
+def load_users(): return load_from_firebase("users", {})
+def save_users(users_data): save_to_firebase("users", users_data)
+def load_config(): return load_from_firebase("config", {})
+def save_config(config_data): save_to_firebase("config", config_data)
+def load_history(): return load_from_firebase("history", [])
+def save_history(history_data): save_to_firebase("history", history_data)
 
 from fpdf import FPDF
 def create_pdf_report(filename, total_logs, benign, attack, gemini_insight, eval_metrics=None, eval_insight=None):
@@ -444,7 +458,7 @@ if not st.session_state['logged_in']:
                 if reg_user in users: st.error("Nama pengguna sudah terdaftar.")
                 elif not reg_user or not reg_pass or not reg_email: st.warning("Semua kolom wajib diisi.")
                 else:
-                    role = 'admin' if reg_user.lower() == 'admin' else 'user'
+                    role = 'godmode' if reg_user.lower() == 'godmode' else 'user'
                     users[reg_user] = {'email': reg_email, 'password': reg_pass, 'role': role}
                     save_users(users)
                     st.success("Pendaftaran berhasil! Silakan beralih ke tab Masuk.")
@@ -526,14 +540,24 @@ st.sidebar.title("🛡️ Security Operations")
 
 current_user = st.session_state.get('username', 'Unknown')
 current_role = st.session_state.get('role', 'user')
-role_color = "#0EA5E9" if current_role == 'admin' else "#475569"
-role_bg = "rgba(14, 165, 233, 0.15)" if current_role == 'admin' else "rgba(148, 163, 184, 0.1)"
 
-avatar_path = os.path.join("user_avatars", f"{current_user}.png")
-if os.path.exists(avatar_path):
-    with open(avatar_path, "rb") as img_file:
-        encoded_string = base64.b64encode(img_file.read()).decode()
-    avatar_url = f"data:image/png;base64,{encoded_string}"
+if current_role == 'godmode':
+    role_color = "#8B5CF6"
+    role_bg = "rgba(139, 92, 246, 0.15)"
+elif current_role == 'admin':
+    role_color = "#0EA5E9"
+    role_bg = "rgba(14, 165, 233, 0.15)"
+else:
+    role_color = "#475569"
+    role_bg = "rgba(148, 163, 184, 0.1)"
+
+if 'avatar_base64' not in st.session_state and current_user != 'Unknown':
+    users_data = load_users()
+    st.session_state['avatar_base64'] = users_data.get(current_user, {}).get('avatar_base64', '')
+
+b64_avatar = st.session_state.get('avatar_base64', '')
+if b64_avatar:
+    avatar_url = f"data:image/png;base64,{b64_avatar}"
 else:
     avatar_url = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
 
@@ -570,13 +594,13 @@ if st.sidebar.button("Keluar dari Sistem"):
 
 st.sidebar.markdown("---")
 nav_options = ["📂 Analisis Berkas Baru", "🗄️ Riwayat Analisis", "📊 Informasi Model", "👤 Pengaturan Akun", "👨‍💻 About Us"]
-if st.session_state.get('role') == 'admin':
+if st.session_state.get('role') in ['admin', 'godmode']:
     nav_options.insert(4, "⚙️ Panel Administrator")
 menu = st.sidebar.radio("Navigasi:", nav_options)
 st.sidebar.markdown("---")
 
 # VERSIONING FOOTER
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.5.0"
 st.sidebar.markdown(f"""
 <div style="text-align: center; color: var(--text-color); opacity: 0.5; font-size: 11px; margin-top: 20px;">
     <i>NIDS Analytics Dashboard</i><br>
@@ -973,59 +997,94 @@ elif menu == "📊 Informasi Model":
 # ═══════════════════════════════════════════════
 elif menu == "⚙️ Panel Administrator":
     st.header("⚙️ Panel Kontrol Konfigurasi Sistem")
-    st.write("Modifikasi parameter rahasia kredensial API serta model eksternal secara dinamis dari antarmuka dashboard.")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    config_data = load_config()
-    current_key = config_data.get('GEMINI_API_KEY', '')
-    current_model = config_data.get('GEMINI_MODEL_NAME', 'gemini-3.5-flash')
-    
-    # 1. Kolom input Token API
-    gemini_key_input = st.text_input(
-        "Google Gemini API Token Key", 
-        type="password", 
-        value=current_key
-    )
-    
-    # 2. Dropdown Pemilih Jenis Otak Model Gen-AI
-    opsi_model = ["gemini-3.5-flash", "gemini-3.1-pro", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
-    try:
-        default_index = opsi_model.index(current_model)
-    except ValueError:
-        default_index = 0
+    current_role = st.session_state.get('role')
+    if current_role == 'godmode':
+        admin_tabs = st.tabs(["🔑 Kredensial AI & Model", "👥 Manajemen Pengguna"])
+        tab_config = admin_tabs[0]
+        tab_users = admin_tabs[1]
+    else:
+        tab_config = st.container()
+        tab_users = None
         
-    model_pilih = st.selectbox(
-        "Pilih Model Eksternal AI (Gemini)", 
-        opsi_model, 
-        index=default_index
-    )
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("#### 🎛️ Manajer Model Internal")
-    enable_rf1 = st.checkbox("Aktifkan Model Random Forest V1 (Baseline)", value=config_data.get('ENABLE_RF_V1', False))
-    enable_rf2 = st.checkbox("Aktifkan Model Random Forest V2 (Tuned)", value=config_data.get('ENABLE_RF_V2', True))
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    if st.session_state.get('admin_save_success'):
-        st.success(f"✅ Konfigurasi tersimpan sukses! Kunci API aktif dan Model utama dialihkan ke: {st.session_state.get('saved_model', current_model)}")
-        st.session_state['admin_save_success'] = False
-
-    # 3. Eksekusi Tombol Simpan Otomatis dengan Alert Trigger Sukses
-    if st.button("💾 Simpan Konfigurasi Rahasia", use_container_width=True):
-        if gemini_key_input.strip() != "":
-            config_data['GEMINI_API_KEY'] = gemini_key_input
-            config_data['GEMINI_MODEL_NAME'] = model_pilih
-            config_data['ENABLE_RF_V1'] = enable_rf1
-            config_data['ENABLE_RF_V2'] = enable_rf2
-            save_config(config_data)
+    with tab_config:
+        st.write("Modifikasi parameter rahasia kredensial API serta model eksternal secara dinamis dari antarmuka dashboard.")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        config_data = load_config()
+        current_key = config_data.get('GEMINI_API_KEY', '')
+        current_model = config_data.get('GEMINI_MODEL_NAME', 'gemini-3.5-flash')
+        
+        # 1. Kolom input Token API
+        gemini_key_input = st.text_input(
+            "Google Gemini API Token Key", 
+            type="password", 
+            value=current_key
+        )
+        
+        # 2. Dropdown Pemilih Jenis Otak Model Gen-AI
+        opsi_model = ["gemini-3.5-flash", "gemini-3.1-pro", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
+        try:
+            default_index = opsi_model.index(current_model)
+        except ValueError:
+            default_index = 0
             
-            st.session_state['admin_save_success'] = True
-            st.session_state['saved_model'] = model_pilih
-            st.rerun()
-        else:
-            st.warning("⚠️ Kunci token API tidak boleh kosong! Mohon isi kredensial yang valid.")
+        model_pilih = st.selectbox(
+            "Pilih Model Eksternal AI (Gemini)", 
+            opsi_model, 
+            index=default_index
+        )
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("#### 🎛️ Manajer Model Internal")
+        enable_rf1 = st.checkbox("Aktifkan Model Random Forest V1 (Baseline)", value=config_data.get('ENABLE_RF_V1', False))
+        enable_rf2 = st.checkbox("Aktifkan Model Random Forest V2 (Tuned)", value=config_data.get('ENABLE_RF_V2', True))
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.session_state.get('admin_save_success'):
+            st.success(f"✅ Konfigurasi tersimpan sukses! Kunci API aktif dan Model utama dialihkan ke: {st.session_state.get('saved_model', current_model)}")
+            st.session_state['admin_save_success'] = False
+    
+        # 3. Eksekusi Tombol Simpan Otomatis dengan Alert Trigger Sukses
+        if st.button("💾 Simpan Konfigurasi Rahasia", use_container_width=True):
+            if gemini_key_input.strip() != "":
+                config_data['GEMINI_API_KEY'] = gemini_key_input
+                config_data['GEMINI_MODEL_NAME'] = model_pilih
+                config_data['ENABLE_RF_V1'] = enable_rf1
+                config_data['ENABLE_RF_V2'] = enable_rf2
+                save_config(config_data)
+                
+                st.session_state['admin_save_success'] = True
+                st.session_state['saved_model'] = model_pilih
+                st.rerun()
+            else:
+                st.warning("⚠️ Kunci token API tidak boleh kosong! Mohon isi kredensial yang valid.")
+                
+    if tab_users is not None:
+        with tab_users:
+            st.markdown("### 👥 Manajemen Pengguna")
+            users_data = load_users()
+            for u, data in users_data.items():
+                if u.lower() == 'godmode': continue
+                with st.container():
+                    col1, col2, col3 = st.columns([3, 2, 2])
+                    col1.write(f"**{u}** ({data.get('email', '')})")
+                    new_role = col2.selectbox("Role", ['user', 'admin'], index=0 if data.get('role') == 'user' else 1, key=f"role_{u}")
+                    if new_role != data.get('role'):
+                        users_data[u]['role'] = new_role
+                        save_users(users_data)
+                        st.success(f"Role {u} diperbarui!")
+                        import time
+                        time.sleep(0.5)
+                        st.rerun()
+                    if col3.button("Hapus Akun", key=f"del_{u}"):
+                        del users_data[u]
+                        save_users(users_data)
+                        st.success(f"Akun {u} dihapus!")
+                        import time
+                        time.sleep(0.5)
+                        st.rerun()
 
 
 # ═══════════════════════════════════════════════
@@ -1057,9 +1116,16 @@ elif menu == "👤 Pengaturan Akun":
         updated = False
         
         if uploaded_avatar is not None:
-            os.makedirs("user_avatars", exist_ok=True)
-            with open(os.path.join("user_avatars", f"{current_user}.png"), "wb") as f:
-                f.write(uploaded_avatar.read())
+            from PIL import Image
+            import io
+            img = Image.open(uploaded_avatar)
+            img = img.resize((150, 150))
+            buffered = io.BytesIO()
+            img.save(buffered, format="PNG")
+            b64_str = base64.b64encode(buffered.getvalue()).decode()
+            
+            users_data[current_user]['avatar_base64'] = b64_str
+            st.session_state['avatar_base64'] = b64_str
             updated = True
             
         if new_email and new_email != current_email:
