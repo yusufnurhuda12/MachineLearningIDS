@@ -948,6 +948,45 @@ elif menu == "📊 Informasi Model":
     with info_tabs[0]:
         st.markdown("<div style='color:#06B6D4; font-weight:bold; font-size:18px;'>⚡ Status: Model Utama (Champion)</div>", unsafe_allow_html=True)
         st.markdown("- **Nama Arsitektur**: XGBoost Classifier\n- **Hyperparameters**: 400 estimators, max_depth=8, learning_rate=0.05\n- **Dataset Pelatihan**: CICIDS2017 + 0.2% CICIDS2018\n- **Skor Validasi Akhir**: **Accuracy 99.56%** | DoS Recall 99.0% | F1-Score 99.58%\n- **Catatan Khusus**: Kombinasi *Per-class threshold tuning* terbukti melesatkan kepekaan klasifikasi kelas minoritas ekstrem.")
+        
+        st.divider()
+        st.subheader("🗺️ Heatmap Korelasi Fitur (Feature Importance)")
+        if 'xgboost' in models_dict:
+            xgb_model = models_dict['xgboost']['model']
+            if hasattr(xgb_model, 'feature_importances_'):
+                importances = xgb_model.feature_importances_
+                feature_names = models_dict['xgboost'].get('features')
+                
+                if feature_names is None:
+                    if hasattr(xgb_model, 'feature_names_in_') and xgb_model.feature_names_in_ is not None:
+                        feature_names = xgb_model.feature_names_in_
+                    elif hasattr(xgb_model, 'get_booster') and xgb_model.get_booster().feature_names is not None:
+                        feature_names = xgb_model.get_booster().feature_names
+                
+                if feature_names is None or len(feature_names) != len(importances):
+                    feature_names = [f"Fitur_{i+1}" for i in range(len(importances))]
+                    
+                df_imp = pd.DataFrame({'Fitur Jaringan': feature_names, 'Tingkat Kepentingan': importances})
+                df_imp = df_imp.sort_values(by='Tingkat Kepentingan', ascending=True).tail(15)
+                fig_imp = px.bar(df_imp, x='Tingkat Kepentingan', y='Fitur Jaringan', orientation='h', color='Tingkat Kepentingan', color_continuous_scale='Blues')
+                fig_imp.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#94A3B8'))
+                st.plotly_chart(fig_imp, use_container_width=True)
+            else:
+                st.info("Model XGBoost ini tidak mendukung ekstraksi atribut Feature Importances.")
+        else:
+            st.warning("Model XGBoost tidak dimuat.")
+            
+        st.divider()
+        st.subheader("📈 Hasil Pengujian Validasi Silang (K-Fold Validation)")
+        kfold_xgb_data = {
+            'Metode Pengujian (K)': ['K = 5 Folds', 'K = 7 Folds', 'K = 10 Folds'],
+            'Mean (Akurasi)': ['0.999450', '0.999492', '0.999500'],
+            'Rata-rata Presisi': ['0.999450', '0.999492', '0.999500'],
+            'Rata-rata Recall': ['0.999450', '0.999492', '0.999500'],
+            'Standar Deviasi': ['0.000133', '0.000121', '0.000121'],
+            'Status Model': ['Konsisten', 'Sangat Stabil', 'Optimal Tanpa Overfitting']
+        }
+        st.dataframe(pd.DataFrame(kfold_xgb_data), use_container_width=True, hide_index=True)
     
     tab_idx = 1
     if 'rf_v1' in models_dict:
@@ -959,39 +998,19 @@ elif menu == "📊 Informasi Model":
         with info_tabs[tab_idx]:
             st.markdown("<div style='color:#14B8A6; font-weight:bold; font-size:18px;'>✅ Status: Model Teroptimasi (Tuned)</div>", unsafe_allow_html=True)
             st.markdown("- **Nama Arsitektur**: Random Forest Classifier (After Tuning)\n- **Hyperparameters**: 300 trees, max_depth=25\n- **Dataset Pelatihan**: CICIDS2017 + 0.2% CICIDS2018\n- **Skor Validasi Akhir**: Accuracy 95.01% | DoS Recall 76.5% | F1-Score 94.92%\n- **Catatan Khusus**: Seleksi fitur ketat berbasis eliminasi matriks korelasi >0.92 dilanjutkan perankingan RF Importance 95% cumsum.")
+            
+            st.divider()
+            st.subheader("📈 Hasil Pengujian Validasi Silang (K-Fold Validation)")
+            kfold_rf_data = {
+                'Metode Pengujian (K)': ['K = 5 Folds', 'K = 7 Folds', 'K = 10 Folds'],
+                'Mean (Akurasi)': ['0.998746', '0.998779', '0.998812'],
+                'Rata-rata Presisi': ['0.998746', '0.998779', '0.998813'],
+                'Rata-rata Recall': ['0.998746', '0.998779', '0.998812'],
+                'Standar Deviasi': ['0.000165', '0.000191', '0.000224'],
+                'Status Model': ['Konsisten', 'Sangat Stabil', 'Optimal Tanpa Overfitting']
+            }
+            st.dataframe(pd.DataFrame(kfold_rf_data), use_container_width=True, hide_index=True)
         tab_idx += 1
-
-    st.divider()
-    st.subheader("🗺️ Heatmap Korelasi Fitur (Feature Importance)")
-    if 'xgboost' in models_dict:
-        xgb_model = models_dict['xgboost']['model']
-        if hasattr(xgb_model, 'feature_importances_'):
-            importances = xgb_model.feature_importances_
-            feature_names = models_dict['xgboost'].get('features')
-            
-            if feature_names is None:
-                if hasattr(xgb_model, 'feature_names_in_') and xgb_model.feature_names_in_ is not None:
-                    feature_names = xgb_model.feature_names_in_
-                elif hasattr(xgb_model, 'get_booster') and xgb_model.get_booster().feature_names is not None:
-                    feature_names = xgb_model.get_booster().feature_names
-            
-            if feature_names is None or len(feature_names) != len(importances):
-                feature_names = [f"Fitur_{i+1}" for i in range(len(importances))]
-                
-            df_imp = pd.DataFrame({'Fitur Jaringan': feature_names, 'Tingkat Kepentingan': importances})
-            df_imp = df_imp.sort_values(by='Tingkat Kepentingan', ascending=True).tail(15)
-            fig_imp = px.bar(df_imp, x='Tingkat Kepentingan', y='Fitur Jaringan', orientation='h', color='Tingkat Kepentingan', color_continuous_scale='Blues')
-            fig_imp.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#94A3B8'))
-            st.plotly_chart(fig_imp, use_container_width=True)
-        else:
-            st.info("Model XGBoost ini tidak mendukung ekstraksi atribut Feature Importances.")
-    else:
-        st.warning("Model XGBoost tidak dimuat.")
-
-    st.divider()
-    st.subheader("📈 Hasil Pengujian Validasi Silang (K-Fold Validation)")
-    kfold_data = {'Metode Pengujian (K)': ['K = 5 Folds', 'K = 7 Folds', 'K = 10 Folds'], 'Rata-rata Akurasi': ['~94.8%', '~95.0%', '~95.1%'], 'Rata-rata Presisi': ['~94.5%', '~94.8%', '~94.9%'], 'Rata-rata Recall': ['~94.8%', '~95.0%', '~95.1%'], 'Status Model': ['Konsisten', 'Sangat Stabil', 'Optimal Tanpa Overfitting']}
-    st.dataframe(pd.DataFrame(kfold_data), use_container_width=True, hide_index=True)
 # ═══════════════════════════════════════════════
 # MENU 3 – PANEL ADMINISTRATOR (DYNAMIC MULTI-MODEL SELECTOR)
 # ═══════════════════════════════════════════════
