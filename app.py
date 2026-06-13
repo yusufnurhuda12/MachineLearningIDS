@@ -675,9 +675,18 @@ if menu == "📂 Analisis Berkas Baru":
                     y_true = df['Label'].str.strip().str.upper().map(LABEL_MAP).fillna(df['Label'].str.strip().str.upper())
 
                 X = df.copy()
+                
+                start_xgb = time.time()
                 y_pred_xgb = predict_single(models_dict['xgboost'], X) if 'xgboost' in models_dict else None
+                time_xgb = time.time() - start_xgb if y_pred_xgb is not None else 0
+                
+                start_rf1 = time.time()
                 y_pred_rf1 = predict_single(models_dict['rf_v1'], X) if 'rf_v1' in models_dict else None
+                time_rf1 = time.time() - start_rf1 if y_pred_rf1 is not None else 0
+                
+                start_rf2 = time.time()
                 y_pred_rf2 = predict_single(models_dict['rf_v2'], X) if 'rf_v2' in models_dict else None
+                time_rf2 = time.time() - start_rf2 if y_pred_rf2 is not None else 0
 
                 if analysis_mode == "Simulasi Real-Time (Streaming)" and y_pred_xgb is not None:
                     progress_text = "Menyimulasikan arus lalu lintas jaringan (SOC Monitoring)..."
@@ -716,7 +725,9 @@ if menu == "📂 Analisis Berkas Baru":
                         "total_logs": len(y_pred_xgb),
                         "benign": int(benign_count),
                         "attack": int(attack_count),
-                        "duration": f"{duration_sec:.2f} dtk"
+                        "duration": f"{duration_sec:.2f} dtk",
+                        "time_xgb": f"{time_xgb:.2f} dtk",
+                        "time_rf": f"{(time_rf1 + time_rf2):.2f} dtk"
                     })
                     save_history(history[:50])
 
@@ -788,19 +799,19 @@ if menu == "📂 Analisis Berkas Baru":
                 df_analysis = pd.DataFrame({
                     'Urutan Log Jaringan': range(1, total_logs + 1),
                     'Kategori': y_pred,
-                    'Tingkat Kritis': ['Tinggi' if label != 'BENIGN' else 'Rendah' for label in y_pred],
-                    'Bobot Paket': [1 if label != 'BENIGN' else 0 for label in y_pred]
+                    'Status Serangan': ['Serangan' if label != 'BENIGN' else 'Tidak' for label in y_pred]
                 })
+                akumulasi_serangan = pd.Series([1 if label != 'BENIGN' else 0 for label in y_pred]).cumsum()
 
                 with col_left:
                     st.markdown("#### 🔍 Filter Insight")
                     opsi_kategori = ["Semua Kategori"] + list(unique)
                     pilihan_kategori = st.selectbox("KATEGORI ANOMALI", opsi_kategori, key=f"sel_{title}")
-                    pilihan_kritis = st.radio("TINGKAT RISIKO", ["Semua", "Tinggi", "Rendah"], horizontal=True, key=f"rad_{title}")
+                    pilihan_kritis = st.radio("STATUS SERANGAN", ["Semua", "Serangan", "Tidak"], horizontal=True, key=f"rad_{title}")
                     
                     df_filtered = df_analysis.copy()
                     if pilihan_kategori != "Semua Kategori": df_filtered = df_filtered[df_filtered['Kategori'] == pilihan_kategori]
-                    if pilihan_kritis != "Semua": df_filtered = df_filtered[df_filtered['Tingkat Kritis'] == pilihan_kritis]
+                    if pilihan_kritis != "Semua": df_filtered = df_filtered[df_filtered['Status Serangan'] == pilihan_kritis]
 
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.markdown("#### 📌 Komposisi Anomali")
@@ -810,7 +821,7 @@ if menu == "📂 Analisis Berkas Baru":
 
                 with col_right:
                     st.markdown("#### 📈 Tren Distribusi Anomali")
-                    df_analysis['Akumulasi Serangan'] = df_analysis['Bobot Paket'].cumsum()
+                    df_analysis['Akumulasi Serangan'] = akumulasi_serangan
                     
                     # Optimasi Performa: Sampling data agar browser tidak lag
                     sample_rate = max(1, len(df_analysis) // 500)
@@ -924,8 +935,15 @@ elif menu == "🗄️ Riwayat Analisis":
             "total_logs": "Total Baris",
             "benign": "Normal (Benign)",
             "attack": "Anomali (Attack)",
-            "duration": "Waktu Proses"
+            "duration": "Total Waktu Proses",
+            "time_rf": "Waktu Random Forest",
+            "time_xgb": "Waktu XGBoost"
         }, inplace=True)
+        
+        columns_order = ["Anomali (Attack)", "Normal (Benign)", "Total Waktu Proses", "Waktu Random Forest", "Waktu XGBoost", "Nama Berkas", "Waktu Analisis", "Total Baris", "Pengguna"]
+        existing_cols = [c for c in columns_order if c in df_history.columns]
+        df_history = df_history[existing_cols]
+        
         st.dataframe(df_history, use_container_width=True, hide_index=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
