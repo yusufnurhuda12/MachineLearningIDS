@@ -41,15 +41,13 @@ Penelitian ini dikembangkan untuk:
 
 ## 🔍 Deteksi Intrusi Jaringan
 
-Sistem mampu mengenali berbagai kategori lalu lintas jaringan:
+Sistem mampu mengklasifikasikan lalu lintas jaringan ke dalam kategori berikut:
 
-* BENIGN (Normal Traffic)
-* DoS (Denial of Service)
-* DDoS (Distributed Denial of Service)
-* Port Scan
-* Brute Force
-* Web Attack
+- **BENIGN** — Lalu lintas jaringan normal tanpa indikasi aktivitas berbahaya.
+- **DoS (Denial of Service)** — Serangan yang bertujuan mengganggu ketersediaan layanan dengan membanjiri target menggunakan trafik berlebih.
+- **Port Scan** — Aktivitas pemindaian port yang dilakukan untuk mengidentifikasi layanan dan celah keamanan yang terbuka pada suatu host.
 
+Sistem dirancang untuk membantu administrator jaringan dalam mengidentifikasi aktivitas mencurigakan secara cepat melalui analisis berbasis Machine Learning.
 ---
 
 ## 🚀 Model Machine Learning
