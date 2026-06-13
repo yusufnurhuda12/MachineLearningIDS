@@ -1,6 +1,6 @@
 # 🛡️ NIDS Analytics Dashboard
 
-A modern **Network Intrusion Detection System (NIDS)** powered by **Machine Learning**, designed to detect malicious network activities such as **DoS**, **DDoS**, **Port Scanning**, **Brute Force**, and **Web Attacks** through an interactive SOC-style dashboard.
+Sistem **Network Intrusion Detection System (NIDS)** berbasis **Machine Learning** yang dirancang untuk mendeteksi aktivitas lalu lintas jaringan berbahaya seperti **Denial of Service (DoS)**, **Distributed Denial of Service (DDoS)**, **Port Scanning**, **Brute Force**, dan **Web Attack** melalui dasbor interaktif bergaya **Security Operations Center (SOC)**.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
@@ -10,142 +10,297 @@ A modern **Network Intrusion Detection System (NIDS)** powered by **Machine Lear
 
 ---
 
-## 📌 Overview
+# 📌 Gambaran Umum
 
-NIDS Analytics Dashboard is a cybersecurity monitoring platform that combines:
+NIDS Analytics Dashboard merupakan platform pemantauan keamanan jaringan yang menggabungkan teknologi:
 
-* Machine Learning-based intrusion detection
-* Interactive Security Operations Center (SOC) dashboard
-* AI-generated security recommendations
-* Automated PDF reporting
-* User authentication and role management
+* Deteksi intrusi berbasis Machine Learning
+* Dasbor Security Operations Center (SOC) interaktif
+* Analisis dan rekomendasi berbasis Artificial Intelligence (AI)
+* Pembuatan laporan otomatis dalam format PDF
+* Sistem autentikasi dan manajemen pengguna
 
-The system is trained using the **CICIDS2017** dataset and enhanced with selected samples from **CICIDS2018** to improve attack detection capability.
+Sistem dilatih menggunakan dataset **CICIDS2017** dan diperkaya dengan sebagian data dari **CICIDS2018** untuk meningkatkan kemampuan deteksi terhadap berbagai jenis serangan jaringan modern.
 
 ---
 
-## ✨ Features
+# 🎯 Tujuan Penelitian
 
-### 🔍 Intrusion Detection
+Penelitian ini dikembangkan untuk:
 
-Detects multiple attack categories:
+* Mengkaji efektivitas Machine Learning pada sistem Network Intrusion Detection System (NIDS).
+* Membandingkan performa algoritma XGBoost dan Random Forest dalam mendeteksi serangan jaringan.
+* Mengevaluasi pengaruh proses Feature Engineering terhadap akurasi model.
+* Mengembangkan sistem monitoring keamanan jaringan yang mudah digunakan.
+* Mengintegrasikan Generative AI sebagai pendukung interpretasi hasil deteksi keamanan jaringan.
+* Menyediakan platform analisis keamanan jaringan yang dapat digunakan sebagai media pembelajaran maupun penelitian.
 
+---
+
+# ✨ Fitur Utama
+
+## 🔍 Deteksi Intrusi Jaringan
+
+Sistem mampu mengenali berbagai kategori lalu lintas jaringan:
+
+* BENIGN (Normal Traffic)
 * DoS (Denial of Service)
-* DDoS
-* Port Scanning
+* DDoS (Distributed Denial of Service)
+* Port Scan
 * Brute Force
 * Web Attack
-* Normal Traffic (BENIGN)
 
 ---
 
-### 🚀 Machine Learning Models
+## 🚀 Model Machine Learning
 
-#### Champion Model
+### Model Utama (Champion Model)
 
-* XGBoost Classifier
+#### XGBoost Classifier
+
+Spesifikasi:
+
 * 400 Estimators
 * Max Depth = 8
 * Learning Rate = 0.05
 * Per-Class Threshold Tuning
 
-#### Supporting Models
+Keunggulan:
 
-* Random Forest V1 (Baseline)
-* Random Forest V2 (Tuned)
-
----
-
-### 📊 Interactive Dashboard
-
-Provides:
-
-* Threat distribution charts
-* Attack trend visualization
-* Real-time monitoring simulation
-* Confusion matrix
-* Performance metrics
-* Historical analysis records
+* Akurasi sangat tinggi
+* Sensitivitas tinggi terhadap kelas minoritas
+* Performa terbaik pada dataset penelitian
 
 ---
 
-### 🤖 AI Security Insight
+### Model Pembanding
 
-Integrated with Google Gemini AI:
+#### Random Forest V1
 
-* Executive security summary
-* Threat assessment
-* Mitigation recommendations
-* SOC-style incident explanation
+* Model dasar sebelum optimasi
+* Digunakan sebagai baseline penelitian
 
----
+#### Random Forest V2
 
-### 📄 Automated Reporting
-
-Export:
-
-* CSV Analysis Report
-* Executive PDF Security Report
-
-Generated reports include:
-
-* Threat statistics
-* Attack ratio
-* AI-generated recommendations
-* Model evaluation metrics
+* Model hasil tuning parameter
+* Digunakan sebagai pembanding terhadap XGBoost
 
 ---
 
-### 👥 User Authentication
+## 📊 Dasbor Interaktif
 
-Supports:
+Menyediakan berbagai fitur visualisasi:
 
-* Login
-* Registration
-* Role-based access
-
-Roles:
-
-| Role    | Access                    |
-| ------- | ------------------------- |
-| User    | Analysis Dashboard        |
-| Admin   | Dashboard + Configuration |
-| Godmode | Full System Control       |
+* Distribusi jenis serangan
+* Tren serangan jaringan
+* Simulasi monitoring real-time
+* Confusion Matrix
+* Evaluasi performa model
+* Riwayat analisis jaringan
+* Statistik keamanan jaringan
 
 ---
 
-## 🏗️ System Architecture
+## 🤖 Analisis AI Security Insight
+
+Terintegrasi dengan Google Gemini AI untuk menghasilkan:
+
+* Ringkasan eksekutif keamanan jaringan
+* Analisis ancaman siber
+* Rekomendasi mitigasi
+* Penjelasan insiden bergaya Security Operations Center (SOC)
+
+---
+
+## 📄 Pembuatan Laporan Otomatis
+
+Laporan dapat diekspor dalam format:
+
+### CSV
+
+Berisi:
+
+* Hasil klasifikasi
+* Detail serangan
+* Data hasil analisis
+
+### PDF
+
+Berisi:
+
+* Ringkasan hasil analisis
+* Statistik ancaman
+* Rasio serangan
+* Evaluasi model
+* Rekomendasi keamanan berbasis AI
+
+---
+
+# 👥 Role-Based Access Control (RBAC)
+
+Sistem menerapkan mekanisme **Role-Based Access Control (RBAC)** untuk mengatur hak akses pengguna berdasarkan tingkat otorisasinya.
+
+---
+
+## 👤 User
+
+Peran standar yang ditujukan untuk analis keamanan maupun pengguna umum.
+
+### Hak Akses
+
+* Mengunggah berkas CSV lalu lintas jaringan
+* Menjalankan analisis intrusi
+* Melihat hasil prediksi model
+* Mengakses visualisasi dan grafik
+* Menggunakan fitur AI Security Insight
+* Mengunduh laporan PDF dan CSV
+* Melihat riwayat analisis
+
+### Pembatasan
+
+* Tidak dapat mengubah konfigurasi sistem
+* Tidak dapat mengelola pengguna lain
+* Tidak dapat mengakses panel administrator
+
+---
+
+## 🛠️ Administrator
+
+Peran yang bertanggung jawab terhadap pengelolaan operasional sistem.
+
+### Hak Akses
+
+Seluruh hak akses User ditambah:
+
+* Mengakses Panel Administrator
+* Mengelola konfigurasi sistem
+* Mengatur integrasi Gemini AI
+* Mengaktifkan atau menonaktifkan model Machine Learning
+* Memelihara konfigurasi aplikasi
+
+### Pembatasan
+
+* Tidak dapat mengelola akun Super Administrator
+* Tidak memiliki akses penuh terhadap seluruh kontrol sistem
+
+---
+
+## 👑 Super Administrator (Godmode)
+
+Peran dengan tingkat otorisasi tertinggi.
+
+### Hak Akses
+
+Seluruh hak akses Administrator ditambah:
+
+* Manajemen seluruh akun pengguna
+* Membuat akun administrator baru
+* Mengubah role pengguna
+* Menghapus akun pengguna
+* Mengontrol seluruh konfigurasi aplikasi
+* Mengelola kebijakan keamanan sistem
+* Mengelola integrasi AI dan Machine Learning
+* Melakukan audit aktivitas sistem
+
+### Ditujukan Untuk
+
+* Pemilik Sistem
+* Peneliti Utama
+* Administrator Infrastruktur
+* Security Operations Manager
+* Dosen Pembimbing / Penguji (Mode Demonstrasi)
+
+---
+
+## Matriks Hak Akses
+
+| Fitur                         | User | Administrator | Super Administrator |
+| ----------------------------- | :--: | :-----------: | :-----------------: |
+| Analisis Lalu Lintas Jaringan |   ✅  |       ✅       |          ✅          |
+| Visualisasi Dashboard         |   ✅  |       ✅       |          ✅          |
+| AI Security Insight           |   ✅  |       ✅       |          ✅          |
+| Export PDF & CSV              |   ✅  |       ✅       |          ✅          |
+| Riwayat Analisis              |   ✅  |       ✅       |          ✅          |
+| Konfigurasi Sistem            |   ❌  |       ✅       |          ✅          |
+| Pengaturan Model ML           |   ❌  |       ✅       |          ✅          |
+| Konfigurasi Gemini AI         |   ❌  |       ✅       |          ✅          |
+| Manajemen Pengguna            |   ❌  |       ❌       |          ✅          |
+| Perubahan Role Pengguna       |   ❌  |       ❌       |          ✅          |
+| Kontrol Sistem Penuh          |   ❌  |       ❌       |          ✅          |
+
+---
+
+# 🏗️ Arsitektur Sistem
 
 ```text
-Network Traffic CSV
-          │
-          ▼
-Data Cleaning & Normalization
-          │
-          ▼
+Berkas CSV Lalu Lintas Jaringan
+                │
+                ▼
+Pembersihan dan Normalisasi Data
+                │
+                ▼
 Feature Engineering
-          │
-          ▼
-Machine Learning Models
+                │
+                ▼
+Standarisasi Data (Scaler)
+                │
+                ▼
+Model Machine Learning
  ├── XGBoost
  ├── Random Forest V1
  └── Random Forest V2
-          │
-          ▼
-Prediction Engine
-          │
-          ▼
-SOC Dashboard
-          │
-          ├── Visualization
-          ├── AI Insight
-          ├── PDF Report
-          └── Historical Analysis
+                │
+                ▼
+Mesin Prediksi
+                │
+                ▼
+Dasbor SOC
+                │
+                ├── Visualisasi
+                ├── AI Security Insight
+                ├── Evaluasi Model
+                ├── Riwayat Analisis
+                └── Laporan PDF
 ```
 
 ---
 
-## 📂 Project Structure
+# 🧠 Alur Machine Learning
+
+```text
+Dataset CICIDS2017 & CICIDS2018
+            │
+            ▼
+Data Cleaning
+            │
+            ▼
+Feature Harmonization
+            │
+            ▼
+Feature Engineering
+            │
+            ▼
+Standardisasi Data
+            │
+            ▼
+Pelatihan Model
+            │
+            ▼
+Threshold Optimization
+            │
+            ▼
+Prediksi Intrusi
+            │
+            ▼
+Analisis AI
+            │
+            ▼
+Visualisasi Dashboard
+```
+
+---
+
+# 📂 Struktur Proyek
 
 ```text
 NIDS-Dashboard/
@@ -163,30 +318,28 @@ NIDS-Dashboard/
 ├── users.json
 ├── config.json
 ├── analysis_history.json
-│
-├── reports/
-│
 ├── requirements.txt
-│
 └── README.md
 ```
 
 ---
 
-## ⚙️ Installation
+# ⚙️ Instalasi
 
-### 1. Clone Repository
+### Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/nids-dashboard.git
-cd nids-dashboard
+git clone https://github.com/yusufnurhuda12/MachineLearningIDS.git
+cd MachineLearningIDS
 ```
 
-### 2. Create Virtual Environment
+### Membuat Virtual Environment
 
 ```bash
 python -m venv venv
 ```
+
+### Aktivasi Environment
 
 Linux/Mac:
 
@@ -200,7 +353,7 @@ Windows:
 venv\Scripts\activate
 ```
 
-### 3. Install Dependencies
+### Instalasi Dependensi
 
 ```bash
 pip install -r requirements.txt
@@ -208,55 +361,13 @@ pip install -r requirements.txt
 
 ---
 
-## 📦 Required Packages
-
-```bash
-streamlit
-pandas
-numpy
-joblib
-plotly
-scikit-learn
-xgboost
-google-generativeai
-fpdf2
-requests
-```
-
----
-
-## 🔑 Gemini AI Configuration
-
-Create:
-
-```json
-config.json
-```
-
-Example:
-
-```json
-{
-  "GEMINI_API_KEY": "YOUR_API_KEY",
-  "GEMINI_MODEL_NAME": "gemini-3.5-flash"
-}
-```
-
-Or configure via:
-
-```bash
-export GEMINI_API_KEY=YOUR_API_KEY
-```
-
----
-
-## 🚀 Running The Application
+# 🚀 Menjalankan Aplikasi
 
 ```bash
 streamlit run app.py
 ```
 
-Default URL:
+Aplikasi dapat diakses melalui:
 
 ```text
 http://localhost:8501
@@ -264,57 +375,60 @@ http://localhost:8501
 
 ---
 
-## 📈 Model Performance
+# 📈 Performa Model
 
-### XGBoost (Champion)
+## XGBoost (Champion Model)
 
-| Metric    | Score  |
+| Metrik    | Nilai  |
 | --------- | ------ |
 | Accuracy  | 99.56% |
 | Precision | 99.56% |
 | Recall    | 99.00% |
 | F1-Score  | 99.58% |
 
-### Random Forest V2
+---
 
-| Metric       | Score  |
-| ------------ | ------ |
-| Accuracy     | 95.01% |
-| Recall (DoS) | 76.5%  |
-| F1 Score     | 94.92% |
+## Random Forest V2
+
+| Metrik     | Nilai  |
+| ---------- | ------ |
+| Accuracy   | 95.01% |
+| Recall DoS | 76.50% |
+| F1-Score   | 94.92% |
 
 ---
 
-## 📊 Dataset
+# 📊 Dataset
 
-Primary Dataset:
+Dataset utama:
 
 * CICIDS2017
 
-Additional Dataset:
+Dataset tambahan:
 
 * CICIDS2018 (Selected Samples)
 
-Source:
+Sumber Dataset:
 
 https://www.unb.ca/cic/datasets/
 
 ---
 
-## 🔒 Security Notes
+# 🔒 Catatan Keamanan
 
-This project is intended for:
+Sistem ini dikembangkan untuk:
 
-* Educational research
-* Academic projects
-* Security monitoring simulation
-* Intrusion detection experimentation
+* Penelitian akademik
+* Tugas akhir dan skripsi
+* Pembelajaran keamanan jaringan
+* Eksperimen Machine Learning
 
-Not recommended as a standalone production SOC platform without:
+Sistem belum dirancang sebagai SOC produksi skala enterprise tanpa integrasi tambahan seperti:
 
-* SIEM integration
-* Centralized logging
-* Continuous model retraining
-* Infrastructure hardening
+* SIEM (Security Information and Event Management)
+* Centralized Logging
+* Continuous Model Retraining
+* Infrastructure Hardening
 
 ---
+
