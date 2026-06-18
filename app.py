@@ -11,7 +11,21 @@ import base64
 from sklearn.metrics import (accuracy_score, precision_score,
                              recall_score, f1_score, confusion_matrix,
                              classification_report)
-import streamlit.components.v1 as components
+from streamlit_cookies_controller import CookieController
+
+controller = CookieController()
+
+if st.session_state.get('pending_login'):
+    controller.set('logged_in', 'true')
+    controller.set('username', st.session_state.get('username', ''))
+    controller.set('role', st.session_state.get('role', 'user'))
+    st.session_state['pending_login'] = False
+
+if st.session_state.get('pending_logout'):
+    controller.remove('logged_in')
+    controller.remove('username')
+    controller.remove('role')
+    st.session_state['pending_logout'] = False
 
 # ── Column rename: 2018 format → 2017 format ──────────────────
 COL_HARMONIZE = {
@@ -450,15 +464,9 @@ if not st.session_state['logged_in']:
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = login_user
                     st.session_state['role'] = users[login_user].get('role', 'admin' if login_user == 'admin' else 'user')
-                    components.html(f"""
-                        <script>
-                            document.cookie = "logged_in=true; path=/";
-                            document.cookie = "username={login_user}; path=/";
-                            document.cookie = "role={st.session_state['role']}; path=/";
-                            window.parent.location.reload();
-                        </script>
-                    """, height=0, width=0)
-                    st.success("Berhasil masuk! Menyiapkan dasbor...")
+                    st.session_state['pending_login'] = True
+                    st.success("Berhasil masuk! Membuka dasbor...")
+                    st.rerun()
                 else:
                     st.error("Nama pengguna atau kata sandi salah.")
                     
@@ -605,14 +613,8 @@ st.sidebar.markdown("""
 
 if st.sidebar.button("Keluar dari Sistem"):
     st.session_state['logged_in'] = False
-    components.html("""
-        <script>
-            document.cookie = "logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.parent.location.reload();
-        </script>
-    """, height=0, width=0)
+    st.session_state['pending_logout'] = True
+    st.rerun()
 
 st.sidebar.markdown("---")
 nav_options = ["📂 Analisis Berkas Baru", "🗄️ Riwayat Analisis", "📊 Informasi Model", "👤 Pengaturan Akun", "👨‍💻 About Us"]
