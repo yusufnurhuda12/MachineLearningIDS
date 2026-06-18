@@ -11,6 +11,7 @@ import base64
 from sklearn.metrics import (accuracy_score, precision_score,
                              recall_score, f1_score, confusion_matrix,
                              classification_report)
+import streamlit.components.v1 as components
 
 # ── Column rename: 2018 format → 2017 format ──────────────────
 COL_HARMONIZE = {
@@ -418,10 +419,12 @@ def create_pdf_report(filename, total_logs, benign, attack, gemini_insight, eval
     return bytes(pdf.output())
 
 if 'logged_in' not in st.session_state:
-    if st.query_params.get('logged_in') == 'true':
+    # Membaca cookie secara instan menggunakan context bawaan Streamlit
+    is_logged_in = st.context.cookies.get('logged_in') == 'true'
+    if is_logged_in:
         st.session_state['logged_in'] = True
-        st.session_state['username'] = st.query_params.get('username', '')
-        st.session_state['role'] = st.query_params.get('role', 'user')
+        st.session_state['username'] = st.context.cookies.get('username') or ''
+        st.session_state['role'] = st.context.cookies.get('role') or 'user'
     else:
         st.session_state['logged_in'] = False
         st.session_state['username'] = ''
@@ -447,11 +450,15 @@ if not st.session_state['logged_in']:
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = login_user
                     st.session_state['role'] = users[login_user].get('role', 'admin' if login_user == 'admin' else 'user')
-                    st.query_params['logged_in'] = 'true'
-                    st.query_params['username'] = login_user
-                    st.query_params['role'] = st.session_state['role']
-                    st.success("Berhasil masuk! Membuka dasbor...")
-                    st.rerun()
+                    components.html(f"""
+                        <script>
+                            document.cookie = "logged_in=true; path=/";
+                            document.cookie = "username={login_user}; path=/";
+                            document.cookie = "role={st.session_state['role']}; path=/";
+                            window.parent.location.reload();
+                        </script>
+                    """, height=0, width=0)
+                    st.success("Berhasil masuk! Menyiapkan dasbor...")
                 else:
                     st.error("Nama pengguna atau kata sandi salah.")
                     
@@ -598,8 +605,14 @@ st.sidebar.markdown("""
 
 if st.sidebar.button("Keluar dari Sistem"):
     st.session_state['logged_in'] = False
-    st.query_params.clear()
-    st.rerun()
+    components.html("""
+        <script>
+            document.cookie = "logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.parent.location.reload();
+        </script>
+    """, height=0, width=0)
 
 st.sidebar.markdown("---")
 nav_options = ["📂 Analisis Berkas Baru", "🗄️ Riwayat Analisis", "📊 Informasi Model", "👤 Pengaturan Akun", "👨‍💻 About Us"]
