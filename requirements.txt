@@ -9,4 +9,4 @@ google-generativeai>=0.4.0
 fpdf2
 requests
 Pillow
-streamlit-cookies-controller
+streamlit-cookies-manager
