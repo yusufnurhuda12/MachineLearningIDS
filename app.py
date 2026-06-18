@@ -418,8 +418,13 @@ def create_pdf_report(filename, total_logs, benign, attack, gemini_insight, eval
     return bytes(pdf.output())
 
 if 'logged_in' not in st.session_state:
-    st.session_state['logged_in'] = False
-    st.session_state['username'] = ''
+    if st.query_params.get('logged_in') == 'true':
+        st.session_state['logged_in'] = True
+        st.session_state['username'] = st.query_params.get('username', '')
+        st.session_state['role'] = st.query_params.get('role', 'user')
+    else:
+        st.session_state['logged_in'] = False
+        st.session_state['username'] = ''
 
 if not st.session_state['logged_in']:
     st.markdown("<br><br><br>", unsafe_allow_html=True)
@@ -442,6 +447,9 @@ if not st.session_state['logged_in']:
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = login_user
                     st.session_state['role'] = users[login_user].get('role', 'admin' if login_user == 'admin' else 'user')
+                    st.query_params['logged_in'] = 'true'
+                    st.query_params['username'] = login_user
+                    st.query_params['role'] = st.session_state['role']
                     st.success("Berhasil masuk! Membuka dasbor...")
                     st.rerun()
                 else:
@@ -590,6 +598,7 @@ st.sidebar.markdown("""
 
 if st.sidebar.button("Keluar dari Sistem"):
     st.session_state['logged_in'] = False
+    st.query_params.clear()
     st.rerun()
 
 st.sidebar.markdown("---")
