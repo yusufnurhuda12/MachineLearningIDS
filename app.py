@@ -11,21 +11,17 @@ import base64
 from sklearn.metrics import (accuracy_score, precision_score,
                              recall_score, f1_score, confusion_matrix,
                              classification_report)
-from streamlit_cookies_controller import CookieController
+from streamlit_cookies_manager import EncryptedCookieManager
 
-controller = CookieController()
+# Inisialisasi Cookie Manager (Aman untuk Streamlit Cloud)
+cookies = EncryptedCookieManager(
+    prefix="nids_",
+    password="super_secret_password_for_nids_app_123"
+)
 
-if st.session_state.get('pending_login'):
-    controller.set('logged_in', 'true')
-    controller.set('username', st.session_state.get('username', ''))
-    controller.set('role', st.session_state.get('role', 'user'))
-    st.session_state['pending_login'] = False
-
-if st.session_state.get('pending_logout'):
-    controller.remove('logged_in')
-    controller.remove('username')
-    controller.remove('role')
-    st.session_state['pending_logout'] = False
+if not cookies.ready():
+    # Tunggu sinkronisasi dengan browser
+    st.stop()
 
 # ── Column rename: 2018 format → 2017 format ──────────────────
 COL_HARMONIZE = {
@@ -433,12 +429,10 @@ def create_pdf_report(filename, total_logs, benign, attack, gemini_insight, eval
     return bytes(pdf.output())
 
 if 'logged_in' not in st.session_state:
-    # Membaca cookie secara instan menggunakan context bawaan Streamlit
-    is_logged_in = st.context.cookies.get('logged_in') == 'true'
-    if is_logged_in:
+    if cookies.get('logged_in') == 'true':
         st.session_state['logged_in'] = True
-        st.session_state['username'] = st.context.cookies.get('username') or ''
-        st.session_state['role'] = st.context.cookies.get('role') or 'user'
+        st.session_state['username'] = cookies.get('username') or ''
+        st.session_state['role'] = cookies.get('role') or 'user'
     else:
         st.session_state['logged_in'] = False
         st.session_state['username'] = ''
@@ -464,7 +458,10 @@ if not st.session_state['logged_in']:
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = login_user
                     st.session_state['role'] = users[login_user].get('role', 'admin' if login_user == 'admin' else 'user')
-                    st.session_state['pending_login'] = True
+                    cookies['logged_in'] = 'true'
+                    cookies['username'] = login_user
+                    cookies['role'] = st.session_state['role']
+                    cookies.save()
                     st.success("Berhasil masuk! Membuka dasbor...")
                     st.rerun()
                 else:
@@ -613,7 +610,10 @@ st.sidebar.markdown("""
 
 if st.sidebar.button("Keluar dari Sistem"):
     st.session_state['logged_in'] = False
-    st.session_state['pending_logout'] = True
+    cookies['logged_in'] = ''
+    cookies['username'] = ''
+    cookies['role'] = ''
+    cookies.save()
     st.rerun()
 
 st.sidebar.markdown("---")
