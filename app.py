@@ -1075,7 +1075,7 @@ elif menu == "⚙️ Panel Administrator":
         
         config_data = load_config()
         current_key = config_data.get('GEMINI_API_KEY', '')
-        current_model = config_data.get('GEMINI_MODEL_NAME', 'gemini-3.5-flash')
+        current_model = config_data.get('GEMINI_MODEL_NAME', 'gemini-3.1-flash-lite')
         
         # 1. Kolom input Token API
         gemini_key_input = st.text_input(
@@ -1085,7 +1085,7 @@ elif menu == "⚙️ Panel Administrator":
         )
         
         # 2. Dropdown Pemilih Jenis Otak Model Gen-AI
-        opsi_model = ["gemini-3.5-flash", "gemini-3.1-pro", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
+        opsi_model = ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3.1-pro", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
         try:
             default_index = opsi_model.index(current_model)
         except ValueError:
