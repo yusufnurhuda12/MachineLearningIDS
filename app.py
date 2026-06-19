@@ -263,7 +263,7 @@ def markdown_to_html(text):
 # GEMINI AI INSIGHT FUNCTION (CACHED & UTK SEMUA MODEL)
 # ─────────────────────────────────────────────
 @st.cache_data(show_spinner=False)
-def generate_ai_insight_with_gemini(total, benign, attack, ratio, details_str, api_key, model_name="gemini-3.5-flash"):
+def generate_ai_insight_with_gemini(total, benign, attack, ratio, details_str, api_key, model_name="gemini-3.1-flash-lite"):
     if not api_key:
         if attack > 0:
             return (
@@ -300,7 +300,8 @@ def generate_ai_insight_with_gemini(total, benign, attack, ratio, details_str, a
         return markdown_to_html(response.text)
     except Exception as e:
         return (
-            f"<b>Analisis Taktis SOC (Emergency Fallback):</b> Sistem AI <i>Insight</i> eksternal mengalami hambatan lalu lintas data (<i>Rate Limit Exceeded</i>). Namun berdasarkan analisis deterministik algoritma utama, tercatat adanya aktivitas anomali siber sebesar <b>{ratio:.2f}%</b>, yang didominasi oleh serangan <b>{details_str or 'Tidak Terdefinisi'}</b> sebanyak <b>{attack:,}</b> paket.<br><br>"
+            f"<b>Error API Gemini:</b> {str(e)}<br><br>"
+            f"<b>Analisis Taktis SOC (Emergency Fallback):</b> Sistem AI <i>Insight</i> eksternal mengalami hambatan. Namun berdasarkan analisis deterministik algoritma utama, tercatat adanya aktivitas anomali siber sebesar <b>{ratio:.2f}%</b>, yang didominasi oleh serangan <b>{details_str or 'Tidak Terdefinisi'}</b> sebanyak <b>{attack:,}</b> paket.<br><br>"
             f"<b>Rekomendasi Mitigasi Jaringan Sementara:</b><br>"
             f"- <b>Investigasi Log Manual:</b> Lakukan pengecekan log perimeter secara menyeluruh pada waktu terdeteksinya anomali.<br>"
             f"- <b>Penerapan <i>Rate Limiting</i> Dasar:</b> Terapkan pembatasan trafik sementara pada segmen jaringan yang dicurigai.<br>"
@@ -311,7 +312,7 @@ def generate_ai_insight_with_gemini(total, benign, attack, ratio, details_str, a
 # GEMINI AI MODEL EVALUATION INSIGHT FUNCTION
 # ─────────────────────────────────────────────
 @st.cache_data(show_spinner=False)
-def generate_model_eval_insight_with_gemini(acc, prec, rec, f1, title, api_key, model_name="gemini-3.5-flash"):
+def generate_model_eval_insight_with_gemini(acc, prec, rec, f1, title, api_key, model_name="gemini-3.1-flash-lite"):
     if not api_key:
         if acc >= 0.90: status = "sangat memuaskan dan tangguh"; saran = "Sistem siap untuk di-*deploy* pada *environment* produksi."
         elif acc >= 0.75: status = "cukup baik"; saran = "Masih terdapat ruang untuk optimasi model (*Hyperparameter Tuning*)."
@@ -330,7 +331,7 @@ def generate_model_eval_insight_with_gemini(acc, prec, rec, f1, title, api_key, 
         response = model.generate_content(prompt)
         return markdown_to_html(response.text)
     except Exception as e:
-        return f"Gagal memuat analisis evaluasi otomatis. Model {title} mencapai akurasi {acc*100:.2f}% secara keseluruhan."
+        return f"Gagal memuat analisis evaluasi otomatis (Error: {str(e)}). Model {title} mencapai akurasi {acc*100:.2f}% secara keseluruhan."
 
 # ─────────────────────────────────────────────
 # AUTHENTICATION & CONFIG HELPERS
@@ -776,7 +777,7 @@ if menu == "📂 Analisis Berkas Baru":
         # Load Config
         config_data = load_config()
         gemini_api_key = config_data.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
-        gemini_model_name = config_data.get("GEMINI_MODEL_NAME", "gemini-3.5-flash")
+        gemini_model_name = config_data.get("GEMINI_MODEL_NAME", "gemini-3.1-flash-lite")
 
         # ✨ INSIGHT RENDER ENGINE
         def render_security_insights(y_pred, title):
