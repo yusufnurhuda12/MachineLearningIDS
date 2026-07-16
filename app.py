@@ -6,8 +6,52 @@ import os
 import json
 import re
 import plotly.express as px
-import google.generativeai as genai
 import base64
+import os
+import re
+import google.generativeai as genai
+
+def sync_config_toml(is_light):
+    config_path = os.path.join(".streamlit", "config.toml")
+    os.makedirs(os.path.dirname(config_path), exist_ok=True)
+    config_str = """[server]
+maxUploadSize = 500
+runOnSave = true
+headless = true
+
+[theme]
+"""
+    if is_light:
+        config_str += """base="light"
+primaryColor="#0ea5e9"
+backgroundColor="#f8fafc"
+secondaryBackgroundColor="#f1f5f9"
+textColor="#0f172a"
+font="sans serif"
+"""
+    else:
+        config_str += """base="dark"
+primaryColor="#0ea5e9"
+backgroundColor="#0f172a"
+secondaryBackgroundColor="#1e293b"
+textColor="#f8fafc"
+font="sans serif"
+"""
+    current_config = ""
+    if os.path.exists(config_path):
+        with open(config_path, "r") as f:
+            current_config = f.read()
+    if current_config != config_str:
+        with open(config_path, "w") as f:
+            f.write(config_str)
+
+def get_current_theme_from_config():
+    config_path = os.path.join(".streamlit", "config.toml")
+    if os.path.exists(config_path):
+        with open(config_path, "r") as f:
+            return 'base="light"' in f.read()
+    return False
+
 from sklearn.metrics import (accuracy_score, precision_score,
                              recall_score, f1_score, confusion_matrix,
                              classification_report)
@@ -72,48 +116,97 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# CUSTOM CSS (THEMA CYBERPUNK EXECUTIVE CLOUD)
+# THEME MANAGER & CUSTOM CSS
 # ─────────────────────────────────────────────
+import streamlit.components.v1 as components
+components.html("""
+<script>
+const doc = window.parent.document;
+const style = doc.createElement('style');
+style.innerHTML = `
+    @keyframes spin-sun {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.3); }
+        100% { transform: rotate(360deg) scale(1); }
+    }
+    @keyframes rock-moon {
+        0% { transform: rotate(0deg) scale(1); }
+        25% { transform: rotate(-25deg) scale(1.2); }
+        50% { transform: rotate(15deg) scale(1.2); }
+        75% { transform: rotate(-25deg) scale(1.2); }
+        100% { transform: rotate(0deg) scale(1); }
+    }
+    .sun-emoji-wrapper {
+        display: inline-block;
+        transition: transform 0.3s;
+    }
+    button:hover .sun-emoji-wrapper {
+        animation: spin-sun 1.5s linear infinite;
+    }
+    .moon-emoji-wrapper {
+        display: inline-block;
+        transition: transform 0.3s;
+    }
+    button:hover .moon-emoji-wrapper {
+        animation: rock-moon 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+`;
+if (!doc.getElementById('theme-animations')) {
+    style.id = 'theme-animations';
+    doc.head.appendChild(style);
+}
+
+const animateEmojis = () => {
+    const buttons = doc.querySelectorAll('[data-testid="stButton"] button p');
+    buttons.forEach(p => {
+        if (p.innerText.includes('🌞') && !p.classList.contains('sun-emoji-wrapper')) {
+            p.classList.add('sun-emoji-wrapper');
+        }
+        if (p.innerText.includes('🌙') && !p.classList.contains('moon-emoji-wrapper')) {
+            p.classList.add('moon-emoji-wrapper');
+        }
+    });
+};
+animateEmojis();
+const observer = new MutationObserver(animateEmojis);
+observer.observe(doc.body, {childList: true, subtree: true});
+</script>
+""", height=0, width=0)
 st.markdown("""
 <style>
+    /* Global Button Click Animations */
+    [data-testid="stButton"] button {
+        transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease !important;
+    }
+    [data-testid="stButton"] button:active {
+        transform: scale(0.92) !important;
+    }
+
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
-
-    html, body, [class*="css"] { 
-        font-family: 'Outfit', sans-serif; 
-    }
-
-    [data-testid="stHeader"] { 
-        background: transparent !important; 
-    }
+    html, body, [class*="css"] { font-family: 'Outfit', sans-serif; }
+    [data-testid="stHeader"] { background: transparent !important; }
     [data-testid="stDecoration"] { display: none; }
-    
     [data-testid="stAppViewContainer"] { 
-        background-color: #0f172a;
+        background-color: var(--background-color);
         background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-            radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.03) 0%, transparent 100%);
-        background-size: 30px 30px, 30px 30px, 100% 100%, 100% 100%, 100% 100%;
+            linear-gradient(rgba(128, 128, 128, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(128, 128, 128, 0.05) 1px, transparent 1px);
+        background-size: 30px 30px, 30px 30px;
         background-attachment: fixed;
     }
-    
     [data-testid="stSidebar"] { 
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border-right: 1px solid rgba(14, 165, 233, 0.15);
-        background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
-        box-shadow: inset -1px 0 20px rgba(14, 165, 233, 0.05);
+        backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+        border-right: 1px solid rgba(128, 128, 128, 0.15);
+        background: var(--secondary-background-color) !important;
+        box-shadow: inset -1px 0 20px rgba(128, 128, 128, 0.05);
     }
-
     [data-testid="stSidebar"] .stRadio > label {
         font-size: 11px !important; text-transform: uppercase; letter-spacing: 2px;
         color: var(--text-color); opacity: 0.5; margin-bottom: 10px; font-weight: 700;
     }
     [data-testid="stSidebar"] [data-baseweb="radio"] {
-        background: rgba(148, 163, 184, 0.05); padding: 12px 16px !important;
-        border-radius: 12px; border: 1px solid rgba(148, 163, 184, 0.1); margin-bottom: 8px;
+        background: rgba(128, 128, 128, 0.05); padding: 12px 16px !important;
+        border-radius: 12px; border: 1px solid rgba(128, 128, 128, 0.1); margin-bottom: 8px;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); width: 100%; cursor: pointer;
     }
     [data-testid="stSidebar"] [data-baseweb="radio"]:hover {
@@ -127,7 +220,6 @@ st.markdown("""
     [data-testid="stSidebar"] [data-baseweb="radio"] > div:last-child {
         font-weight: 600; font-size: 14px; color: var(--text-color); margin-left: 0; padding-left: 0;
     }
-
     .main-title {
         font-size: 38px; font-weight: 800;
         background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%);
@@ -138,61 +230,45 @@ st.markdown("""
         font-size: 16px; color: var(--text-color); opacity: 0.7; font-weight: 400;
         margin-bottom: 40px; letter-spacing: 0.5px;
     }
-    
     .metric-card {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(37, 99, 235, 0.1) 100%);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: 24px; padding: 28px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
-        position: relative; overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 1;
+        background: var(--secondary-background-color);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border-radius: 24px; padding: 28px; border: 1px solid rgba(128, 128, 128, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05); position: relative; overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1;
     }
-    
     .metric-card::before {
         content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 2px;
         background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.8), transparent);
         transition: left 0.7s ease;
     }
     .metric-card:hover::before { left: 100%; }
-    
     .metric-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        background: rgba(128, 128, 128, 0.08);
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        box-shadow: 0 15px 40px rgba(0, 198, 255, 0.1);
+        transform: translateY(-8px) scale(1.02); background: rgba(128, 128, 128, 0.08);
+        border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 15px 40px rgba(14, 165, 233, 0.15);
     }
-
-    .metric-value { 
-        font-size: 42px; font-weight: 800; line-height: 1.1; 
-        color: var(--text-color);
-    }
+    .metric-value { font-size: 42px; font-weight: 800; line-height: 1.1; color: var(--text-color); }
     .metric-label {
         font-size: 13px; color: var(--text-color); opacity: 0.6;
         text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; font-weight: 600;
     }
-    
     .metric-value.red  { color: #F43F5E; }
     .metric-value.blue { color: #0EA5E9; }
     .metric-value.yel  { color: #F59E0B; }
     .metric-value.green { color: #10B981; }
     .metric-value.purple { color: #8B5CF6; }
-
     .stButton > button {
         background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
-        color: white; border-radius: 12px; border: none; padding: 12px 28px; 
+        color: white !important; border-radius: 12px; border: none; padding: 12px 28px; 
         font-weight: 600; font-size: 15px; letter-spacing: 0.5px;
         transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.2);
     }
     .stButton > button:hover {
         transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 114, 255, 0.4); color: white;
     }
-
     div[data-baseweb="tab-list"] {
-        gap: 0px; background: rgba(148, 163, 184, 0.15); padding: 4px; border-radius: 16px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        gap: 0px; background: rgba(128, 128, 128, 0.15); padding: 4px; border-radius: 16px;
+        border: 1px solid rgba(128, 128, 128, 0.2);
         backdrop-filter: blur(10px); display: inline-flex; margin-bottom: 20px;
     }
     div[data-baseweb="tab"] {
@@ -204,42 +280,29 @@ st.markdown("""
         background: rgba(128, 128, 128, 0.15) !important; color: var(--text-color) !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
-    
     [data-testid="stDataFrame"] {
-        border-radius: 16px; overflow: hidden;
-        border: 1px solid rgba(128, 128, 128, 0.1);
+        border-radius: 16px; overflow: hidden; border: 1px solid rgba(128, 128, 128, 0.1);
     }
-    
     .streamlit-expanderHeader {
-        background: rgba(128, 128, 128, 0.05) !important;
-        backdrop-filter: blur(10px);
-        border-radius: 16px !important;
-        border: 1px solid rgba(128, 128, 128, 0.1) !important;
-        font-weight: 500 !important;
-        color: var(--text-color) !important;
+        background: rgba(128, 128, 128, 0.05) !important; backdrop-filter: blur(10px);
+        border-radius: 16px !important; border: 1px solid rgba(128, 128, 128, 0.1) !important;
+        font-weight: 500 !important; color: var(--text-color) !important;
     }
-    
     .insight-box {
-        background: rgba(128, 128, 128, 0.03);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(14, 165, 233, 0.3);
-        border-radius: 16px; padding: 20px;
-        position: relative; overflow: hidden;
-        box-shadow: 0 4px 20px rgba(14, 165, 233, 0.05);
+        background: var(--secondary-background-color); backdrop-filter: blur(10px);
+        border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 16px; padding: 20px;
+        position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.05);
         transition: all 0.3s ease;
     }
     .insight-box.danger-style {
-        border-color: rgba(244, 63, 94, 0.3);
-        box-shadow: 0 4px 20px rgba(244, 63, 94, 0.05);
+        border-color: rgba(244, 63, 94, 0.3); box-shadow: 0 4px 20px rgba(244, 63, 94, 0.05);
     }
     .insight-box.danger-style:hover {
-        border-color: rgba(244, 63, 94, 0.6);
-        box-shadow: 0 8px 30px rgba(244, 63, 94, 0.15);
+        border-color: rgba(244, 63, 94, 0.6); box-shadow: 0 8px 30px rgba(244, 63, 94, 0.15);
         transform: translateY(-2px);
     }
     .insight-box:hover {
-        border-color: rgba(14, 165, 233, 0.6);
-        box-shadow: 0 8px 30px rgba(14, 165, 233, 0.15);
+        border-color: rgba(14, 165, 233, 0.6); box-shadow: 0 8px 30px rgba(14, 165, 233, 0.15);
         transform: translateY(-2px);
     }
     .insight-box::before {
@@ -251,6 +314,7 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ── HELPER UNTUK MENGUBAH MARKDOWN GEMINI KE HTML TAGS ──
 def markdown_to_html(text):
@@ -439,7 +503,23 @@ if 'logged_in' not in st.session_state:
         st.session_state['username'] = ''
 
 if not st.session_state['logged_in']:
-    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    col_head, col_tog = st.columns([80, 20])
+    with col_tog:
+        st.markdown("<br>", unsafe_allow_html=True)
+        current_theme_is_light = get_current_theme_from_config()
+        col_dark, col_light = st.columns(2)
+        with col_dark:
+            if st.button("🌙", key="theme_btn_login_dark", use_container_width=True, help="Mode Gelap", type="primary" if not current_theme_is_light else "secondary"):
+                if get_current_theme_from_config():
+                    sync_config_toml(False)
+                    st.rerun()
+        with col_light:
+            if st.button("🌞", key="theme_btn_login_light", use_container_width=True, help="Mode Terang", type="primary" if current_theme_is_light else "secondary"):
+                if not get_current_theme_from_config():
+                    sync_config_toml(True)
+                    st.rerun()
+        
+    st.markdown("<br><br>", unsafe_allow_html=True)
     spacer1, center_col, spacer2 = st.columns([1, 2.5, 1])
     
     with center_col:
@@ -554,8 +634,23 @@ def predict_single(model_info, X):
 # ─────────────────────────────────────────────
 # MAIN VIEWS HEADER & SIDEBAR
 # ─────────────────────────────────────────────
-st.markdown('<div class="main-title">🛡️ Network Intrusion Detection System</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Sistem IDS Berbasis <i>Machine Learning</i> untuk Deteksi Serangan <i>Denial of Service</i> (DoS) dan <i>Port Scanning</i></div>', unsafe_allow_html=True)
+col_head, col_tog = st.columns([80, 20])
+with col_head:
+    st.markdown('<div class="main-title">🛡️ Network Intrusion Detection System</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">Sistem IDS Berbasis <i>Machine Learning</i> untuk Deteksi Serangan <i>Denial of Service</i> (DoS) dan <i>Port Scanning</i></div>', unsafe_allow_html=True)
+with col_tog:
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_dark, col_light = st.columns(2)
+    with col_dark:
+        if st.button("🌙", key="theme_btn_dash_dark", use_container_width=True, help="Mode Gelap", type="primary" if not get_current_theme_from_config() else "secondary"):
+            if get_current_theme_from_config():
+                sync_config_toml(False)
+                st.rerun()
+    with col_light:
+        if st.button("🌞", key="theme_btn_dash_light", use_container_width=True, help="Mode Terang", type="primary" if get_current_theme_from_config() else "secondary"):
+            if not get_current_theme_from_config():
+                sync_config_toml(True)
+                st.rerun()
 
 st.sidebar.title("🛡️ Security Operations")
 
@@ -1085,7 +1180,7 @@ elif menu == "⚙️ Panel Administrator":
         )
         
         # 2. Dropdown Pemilih Jenis Otak Model Gen-AI
-        opsi_model = ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3.1-pro", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
+        opsi_model = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite"]
         try:
             default_index = opsi_model.index(current_model)
         except ValueError:
